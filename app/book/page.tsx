@@ -336,11 +336,22 @@ function BookingForm() {
                   }}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer"
                 >
-                  {countries.map((c) => (
-                    <option key={`${c.code}-${c.name}`} value={c.code || c.name}>
-                      {flagEmoji(c.code)} {c.name} ({c.dial})
-                    </option>
-                  ))}
+                  {/* Popular countries group */}
+                  <optgroup label="── Popular ──">
+                    {countries.slice(0, 13).map((c) => (
+                      <option key={`pop-${c.code}`} value={c.code || c.name}>
+                        {flagEmoji(c.code)} {c.name} ({c.dial})
+                      </option>
+                    ))}
+                  </optgroup>
+                  {/* All other countries A-Z */}
+                  <optgroup label="── All Countries ──">
+                    {countries.slice(13).map((c) => (
+                      <option key={`all-${c.code}-${c.name}`} value={c.code || c.name}>
+                        {flagEmoji(c.code)} {c.name} ({c.dial})
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
                 {countriesLoading && (
                   <p className="text-[11px] text-gray-400 mt-1 px-1">Loading full country list…</p>
