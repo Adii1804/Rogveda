@@ -2,7 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
-import { Booking } from '@/lib/types'
+import { Booking, Currency, CONVERSION, CURRENCY_SYMBOL } from '@/lib/types'
+
+function formatAmount(usd: number, currency: Currency) {
+  const amount = Math.round(usd * CONVERSION[currency])
+  return `${CURRENCY_SYMBOL[currency]}${amount.toLocaleString()}`
+}
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
@@ -43,15 +48,31 @@ export default function VendorPage() {
   const [taskLoading, setTaskLoading] = useState(false)
   const [filter, setFilter] = useState<'all' | 'Confirmed' | 'In Progress'>('all')
   const [refreshing, setRefreshing] = useState(false)
+  const [currency, setCurrency]   = useState<Currency>('USD')
 
   const fetchBookings = useCallback(async (silent = false) => {
     if (!silent) setRefreshing(true)
-    const data = await fetch('/api/vendor/bookings', {
-      headers: { 'x-vendor-auth': 'apollo:apollo123' },
-    }).then((r) => r.json())
-    setBookings(Array.isArray(data) ? data : [])
-    setRefreshing(false)
-    return Array.isArray(data) ? data : []
+    try {
+      const res  = await fetch('/api/vendor/bookings', {
+        headers: { 'x-vendor-auth': 'apollo:apollo123' },
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        console.error('Vendor bookings API error:', data)
+        toast.error(`Failed to load bookings: ${data?.error ?? res.status}`)
+        setRefreshing(false)
+        return []
+      }
+      const list = Array.isArray(data) ? data : []
+      setBookings(list)
+      setRefreshing(false)
+      return list
+    } catch (e) {
+      console.error('Fetch error:', e)
+      toast.error('Network error — could not reach the server')
+      setRefreshing(false)
+      return []
+    }
   }, [])
 
   function handleLogin(e: React.FormEvent) {
@@ -98,7 +119,7 @@ export default function VendorPage() {
     Confirmed:    bookings.filter((b) => b.status === 'Confirmed').length,
     'In Progress':bookings.filter((b) => b.status === 'In Progress').length,
   }
-  const totalRevenue = bookings.reduce((sum, b) => sum + Number(b.price_usd), 0)
+  const totalRevenueUsd = bookings.reduce((sum, b) => sum + Number(b.price_usd), 0)
 
   /* ── Login screen ── */
   if (!loggedIn) {
@@ -174,6 +195,23 @@ export default function VendorPage() {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Currency toggle */}
+            <div className="flex items-center bg-gray-100 rounded-xl p-0.5 gap-0.5">
+              {(['USD', 'INR', 'NGN'] as Currency[]).map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCurrency(c)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    currency === c
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+
             <button
               onClick={() => fetchBookings()}
               disabled={refreshing}
@@ -201,7 +239,7 @@ export default function VendorPage() {
             { label: 'Total Bookings',  value: counts.all,            color: 'text-gray-900' },
             { label: 'Awaiting Action', value: counts.Confirmed,       color: 'text-blue-600' },
             { label: 'In Progress',     value: counts['In Progress'],  color: 'text-amber-600' },
-            { label: 'Total Revenue',   value: `$${totalRevenue.toLocaleString()}`, color: 'text-emerald-600' },
+            { label: 'Total Revenue',   value: formatAmount(totalRevenueUsd, currency), color: 'text-emerald-600' },
           ].map(({ label, value, color }) => (
             <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
               <p className={`text-2xl font-black ${color}`}>{value}</p>
@@ -287,7 +325,7 @@ export default function VendorPage() {
                   </div>
                   {/* Amount */}
                   <div className="hidden md:block md:col-span-2">
-                    <p className="text-sm font-black text-gray-900">${Number(b.price_usd).toLocaleString()}</p>
+                    <p className="text-sm font-black text-gray-900">{formatAmount(Number(b.price_usd), currency)}</p>
                   </div>
                   {/* Status */}
                   <div className="col-span-1 md:col-span-2 flex items-center justify-end md:justify-start">
@@ -357,7 +395,7 @@ export default function VendorPage() {
               <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-2xl p-4">
                 <div>
                   <p className="text-xs text-blue-500 font-bold uppercase tracking-wide">Total Amount</p>
-                  <p className="text-2xl font-black text-blue-700">${Number(selected.price_usd).toLocaleString()}</p>
+                  <p className="text-2xl font-black text-blue-700">{formatAmount(Number(selected.price_usd), currency)}</p>
                 </div>
                 <StatusBadge status={selected.status} />
               </div>

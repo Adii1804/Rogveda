@@ -1,38 +1,35 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
 import { Currency, CONVERSION, CURRENCY_SYMBOL } from '@/lib/types'
 
-const COUNTRIES = [
+type Country = { name: string; code: string; dial: string }
+
+// Shown immediately while Supabase loads, and as fallback if it fails
+const FALLBACK_COUNTRIES: Country[] = [
   { name: 'Nigeria',        code: 'NG', dial: '+234' },
-  { name: 'United Kingdom', code: 'GB', dial: '+44'  },
   { name: 'United States',  code: 'US', dial: '+1'   },
-  { name: 'Kenya',          code: 'KE', dial: '+254' },
+  { name: 'United Kingdom', code: 'GB', dial: '+44'  },
+  { name: 'India',          code: 'IN', dial: '+91'  },
   { name: 'Canada',         code: 'CA', dial: '+1'   },
   { name: 'Australia',      code: 'AU', dial: '+61'  },
-  { name: 'South Africa',   code: 'ZA', dial: '+27'  },
-  { name: 'Ghana',          code: 'GH', dial: '+233' },
-  { name: 'Uganda',         code: 'UG', dial: '+256' },
-  { name: 'Tanzania',       code: 'TZ', dial: '+255' },
-  { name: 'Ethiopia',       code: 'ET', dial: '+251' },
-  { name: 'Zimbabwe',       code: 'ZW', dial: '+263' },
-  { name: 'Zambia',         code: 'ZM', dial: '+260' },
   { name: 'UAE',            code: 'AE', dial: '+971' },
   { name: 'Saudi Arabia',   code: 'SA', dial: '+966' },
-  { name: 'Bangladesh',     code: 'BD', dial: '+880' },
+  { name: 'Kenya',          code: 'KE', dial: '+254' },
+  { name: 'South Africa',   code: 'ZA', dial: '+27'  },
+  { name: 'Ghana',          code: 'GH', dial: '+233' },
   { name: 'Pakistan',       code: 'PK', dial: '+92'  },
-  { name: 'Sri Lanka',      code: 'LK', dial: '+94'  },
-  { name: 'Nepal',          code: 'NP', dial: '+977' },
-  { name: 'Afghanistan',    code: 'AF', dial: '+93'  },
-  { name: 'Germany',        code: 'DE', dial: '+49'  },
-  { name: 'France',         code: 'FR', dial: '+33'  },
-  { name: 'Ireland',        code: 'IE', dial: '+353' },
-  { name: 'New Zealand',    code: 'NZ', dial: '+64'  },
+  { name: 'Bangladesh',     code: 'BD', dial: '+880' },
   { name: 'Other',          code: '',   dial: '+'    },
 ]
+
+function flagEmoji(code: string) {
+  if (!code) return '🌍'
+  return String.fromCodePoint(...[...code].map(c => 0x1F1E6 - 65 + c.charCodeAt(0)))
+}
 
 function formatPrice(usd: number, currency: Currency) {
   const amount = Math.round(usd * CONVERSION[currency])
@@ -43,24 +40,40 @@ function BookingForm() {
   const router = useRouter()
   const params = useSearchParams()
 
-  const hospitalId   = params.get('hospital_id') || ''
-  const hospitalName = params.get('hospital_name') || ''
-  const hospitalCity = params.get('hospital_city') || ''
-  const imgSrc       = params.get('hospital_img') || '/apollo.jpg'
-  const doctorId     = params.get('doctor_id') || ''
-  const doctorName   = params.get('doctor_name') || ''
-  const doctorExp    = params.get('doctor_exp') || ''
-  const roomType     = params.get('room_type') || ''
+  const hospitalId   = params.get('hospital_id')   || ''
+  const hospitalName = params.get('hospital_name')  || ''
+  const hospitalCity = params.get('hospital_city')  || ''
+  const imgSrc       = params.get('hospital_img')   || '/apollo.jpg'
+  const doctorId     = params.get('doctor_id')      || ''
+  const doctorName   = params.get('doctor_name')    || ''
+  const doctorExp    = params.get('doctor_exp')     || ''
+  const roomType     = params.get('room_type')      || ''
   const priceUsd     = Number(params.get('price_usd') || 0)
   const currency     = (params.get('currency') || 'USD') as Currency
 
-  const [name,        setName]        = useState('')
-  const [email,       setEmail]       = useState('')
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0])
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [confirmed, setConfirmed] = useState<{ bookingId: string; newBalance: number } | null>(null)
-  const [error, setError] = useState('')
+  const [countries,        setCountries]        = useState<Country[]>(FALLBACK_COUNTRIES)
+  const [countriesLoading, setCountriesLoading] = useState(true)
+  const [selectedCountry,  setSelectedCountry]  = useState<Country>(FALLBACK_COUNTRIES[0])
+  const [name,             setName]             = useState('')
+  const [email,            setEmail]            = useState('')
+  const [phoneNumber,      setPhoneNumber]      = useState('')
+  const [loading,          setLoading]          = useState(false)
+  const [confirmed,        setConfirmed]        = useState<{ bookingId: string; newBalance: number } | null>(null)
+  const [error,            setError]            = useState('')
+
+  // Fetch countries from Supabase via API
+  useEffect(() => {
+    fetch('/api/countries')
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then((data: Country[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCountries(data)
+          setSelectedCountry(data[0])
+        }
+      })
+      .catch(() => { /* restcountries unavailable — FALLBACK_COUNTRIES already in state */ })
+      .finally(() => setCountriesLoading(false))
+  }, [])
 
   async function handleConfirm(e: React.FormEvent) {
     e.preventDefault()
@@ -84,7 +97,14 @@ function BookingForm() {
       const bookingRes = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ patient_id: patientData.id, hospital_id: hospitalId, doctor_id: doctorId, room_type: roomType, price_usd: priceUsd, currency }),
+        body: JSON.stringify({
+          patient_id:  patientData.id,
+          hospital_id: hospitalId,
+          doctor_id:   doctorId,
+          room_type:   roomType,
+          price_usd:   priceUsd,
+          currency,
+        }),
       })
       const bookingData = await bookingRes.json()
       if (!bookingRes.ok) throw new Error(bookingData.error || 'Booking failed')
@@ -105,9 +125,7 @@ function BookingForm() {
     return (
       <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
-          {/* Success card */}
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-            {/* Green top bar */}
             <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-6 text-center">
               <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,14 +137,12 @@ function BookingForm() {
             </div>
 
             <div className="p-6">
-              {/* Ref ID */}
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center mb-5">
                 <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1">Booking Reference</p>
                 <p className="text-2xl font-black font-mono text-blue-700 tracking-wider">{confirmed.bookingId.slice(0, 8).toUpperCase()}</p>
                 <p className="text-xs text-blue-400 mt-1">Save this for your records</p>
               </div>
 
-              {/* Summary */}
               <div className="space-y-2.5 mb-5">
                 {[
                   { label: 'Patient',   value: name },
@@ -147,7 +163,6 @@ function BookingForm() {
                 </div>
               </div>
 
-              {/* Wallet */}
               <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-5">
                 <div className="flex items-center justify-between">
                   <div>
@@ -158,7 +173,6 @@ function BookingForm() {
                 </div>
               </div>
 
-              {/* Next steps */}
               <div className="bg-gray-50 rounded-2xl p-4 mb-5">
                 <p className="text-sm font-bold text-gray-800 mb-3">What happens next?</p>
                 <div className="space-y-2.5">
@@ -244,9 +258,9 @@ function BookingForm() {
           </div>
           <div className="p-4 space-y-2.5">
             {[
-              { label: 'Procedure',  val: 'Total Knee Replacement' },
-              { label: 'Doctor',     val: `${doctorName} (${doctorExp} yrs exp)` },
-              { label: 'Room',       val: roomType },
+              { label: 'Procedure', val: 'Total Knee Replacement' },
+              { label: 'Doctor',    val: `${doctorName} (${doctorExp} yrs exp)` },
+              { label: 'Room',      val: roomType },
             ].map(({ label, val }) => (
               <div key={label} className="flex justify-between text-sm">
                 <span className="text-gray-400">{label}</span>
@@ -280,6 +294,8 @@ function BookingForm() {
               Your Details
             </h3>
             <div className="space-y-4">
+
+              {/* Full Name */}
               <div>
                 <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
                   Full Name <span className="text-red-400">*</span>
@@ -293,6 +309,8 @@ function BookingForm() {
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition placeholder-gray-300"
                 />
               </div>
+
+              {/* Email */}
               <div>
                 <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
                   Email Address <span className="text-red-400">*</span>
@@ -306,34 +324,35 @@ function BookingForm() {
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition placeholder-gray-300"
                 />
               </div>
+
+              {/* Country */}
               <div>
                 <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Country</label>
                 <select
                   value={selectedCountry.code || selectedCountry.name}
                   onChange={(e) => {
-                    const found = COUNTRIES.find((c) => (c.code || c.name) === e.target.value)
+                    const found = countries.find(c => (c.code || c.name) === e.target.value)
                     if (found) setSelectedCountry(found)
                   }}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer"
                 >
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code || c.name} value={c.code || c.name}>
-                      {c.name} ({c.dial})
+                  {countries.map((c) => (
+                    <option key={`${c.code}-${c.name}`} value={c.code || c.name}>
+                      {flagEmoji(c.code)} {c.name} ({c.dial})
                     </option>
                   ))}
                 </select>
+                {countriesLoading && (
+                  <p className="text-[11px] text-gray-400 mt-1 px-1">Loading full country list…</p>
+                )}
               </div>
 
+              {/* Phone */}
               <div>
                 <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Phone Number</label>
                 <div className="flex gap-2">
-                  {/* Dial code prefix */}
                   <div className="flex items-center gap-1.5 bg-gray-100 border border-gray-200 rounded-xl px-3 py-3 text-sm font-bold text-gray-700 whitespace-nowrap flex-shrink-0">
-                    <span className="text-base leading-none">
-                      {selectedCountry.code
-                        ? String.fromCodePoint(...[...selectedCountry.code].map(c => 0x1F1E6 - 65 + c.charCodeAt(0)))
-                        : '🌍'}
-                    </span>
+                    <span className="text-base leading-none">{flagEmoji(selectedCountry.code)}</span>
                     <span>{selectedCountry.dial}</span>
                   </div>
                   <input
@@ -345,6 +364,7 @@ function BookingForm() {
                   />
                 </div>
               </div>
+
             </div>
           </div>
 
