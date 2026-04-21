@@ -1,17 +1,9 @@
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 
-// Gmail SMTP transporter — uses App Password (not your real Gmail password)
-function getTransporter() {
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  })
-}
+const resend = new Resend(process.env.RESEND_API_KEY)
 
-const FROM = `"Rogveda Medical Travel" <${process.env.GMAIL_USER}>`
+// Using Resend's shared sender — works on free tier to any email
+const FROM = 'Rogveda Medical Travel <onboarding@resend.dev>'
 
 /* ─────────────────────────────────────────────
    Email 1: Booking Confirmation (sent to patient)
@@ -54,7 +46,7 @@ export async function sendBookingConfirmation(opts: {
                 </td>
                 <td align="right">
                   <div style="background:rgba(255,255,255,0.2);border-radius:50px;padding:8px 16px;">
-                    <span style="color:#fff;font-size:13px;font-weight:700;">✓ CONFIRMED</span>
+                    <span style="color:#fff;font-size:13px;font-weight:700;">&#10003; CONFIRMED</span>
                   </div>
                 </td>
               </tr>
@@ -66,7 +58,7 @@ export async function sendBookingConfirmation(opts: {
         <tr><td style="padding:32px;">
 
           <h1 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#111827;">
-            Booking Confirmed, ${patientName}! 🎉
+            Booking Confirmed, ${patientName}! &#127881;
           </h1>
           <p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.7;">
             Your Total Knee Replacement has been booked. Our coordinator will contact you within <strong>24 hours</strong>.
@@ -101,7 +93,7 @@ export async function sendBookingConfirmation(opts: {
 
           <!-- BNPL -->
           <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:16px;padding:16px;margin-bottom:24px;">
-            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#92400e;">💳 Book Now, Pay Later</p>
+            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#92400e;">&#128179; Book Now, Pay Later</p>
             <p style="margin:0;font-size:13px;color:#78350f;line-height:1.6;">
               No payment is due now. Our finance team will reach out to arrange a flexible payment plan.
             </p>
@@ -129,9 +121,9 @@ export async function sendBookingConfirmation(opts: {
           </div>
 
           <div style="text-align:center;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://rogveda.vercel.app'}/my-bookings"
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://rogveda-xi.vercel.app'}/my-bookings"
                style="display:inline-block;background:#1d4ed8;color:#fff;font-size:14px;font-weight:700;padding:14px 32px;border-radius:14px;text-decoration:none;">
-              Track Your Booking →
+              Track Your Booking &rarr;
             </a>
           </div>
 
@@ -140,7 +132,7 @@ export async function sendBookingConfirmation(opts: {
         <!-- Footer -->
         <tr><td style="background:#f9fafb;border-top:1px solid #f3f4f6;padding:20px 32px;text-align:center;">
           <p style="margin:0;font-size:12px;color:#9ca3af;">
-            © 2025 Rogveda · Medical Travel Booking<br/>
+            &copy; 2025 Rogveda &middot; Medical Travel Booking<br/>
             Trusted by patients from 40+ countries worldwide
           </p>
         </td></tr>
@@ -151,10 +143,10 @@ export async function sendBookingConfirmation(opts: {
 </body>
 </html>`
 
-  return getTransporter().sendMail({
+  return resend.emails.send({
     from: FROM,
     to,
-    subject: `✅ Booking Confirmed — ${hospitalName} | Ref: ${bookingRef}`,
+    subject: `Booking Confirmed - ${hospitalName} | Ref: ${bookingRef}`,
     html,
   })
 }
@@ -189,8 +181,8 @@ export async function sendVisaLetterNotification(opts: {
             <div style="display:inline-block;background:rgba(255,255,255,0.15);border-radius:12px;padding:8px 16px;margin-bottom:16px;">
               <span style="color:#fff;font-size:22px;font-weight:900;">Rogveda</span>
             </div>
-            <h1 style="margin:0;color:#fff;font-size:24px;font-weight:900;">✉️ Your Visa Letter is Ready!</h1>
-            <p style="margin:8px 0 0;color:rgba(255,255,255,0.8);font-size:14px;">Great news — your journey to India just got one step closer</p>
+            <h1 style="margin:0;color:#fff;font-size:24px;font-weight:900;">&#9993; Your Visa Letter is Ready!</h1>
+            <p style="margin:8px 0 0;color:rgba(255,255,255,0.8);font-size:14px;">Great news &mdash; your journey to India just got one step closer</p>
           </td>
         </tr>
 
@@ -205,7 +197,7 @@ export async function sendVisaLetterNotification(opts: {
           <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:16px;padding:20px;margin-bottom:24px;">
             <table cellpadding="0" cellspacing="0" width="100%"><tr>
               <td style="width:48px;">
-                <div style="width:44px;height:44px;background:#22c55e;border-radius:12px;text-align:center;line-height:44px;font-size:22px;">✓</div>
+                <div style="width:44px;height:44px;background:#22c55e;border-radius:12px;text-align:center;line-height:44px;font-size:22px;">&#10003;</div>
               </td>
               <td style="padding-left:14px;">
                 <p style="margin:0;font-size:15px;font-weight:800;color:#14532d;">Visa Invitation Letter Sent</p>
@@ -220,7 +212,7 @@ export async function sendVisaLetterNotification(opts: {
               ['Booking Ref', bookingRef],
               ['Hospital',   hospitalName],
               ['Doctor',     doctorName],
-              ['Status',     '🟡 In Progress'],
+              ['Status',     'In Progress'],
             ].map(([label, value]) => `
             <tr><td style="padding:11px 20px;border-bottom:1px solid #f3f4f6;">
               <table width="100%"><tr>
@@ -241,9 +233,9 @@ export async function sendVisaLetterNotification(opts: {
           </div>
 
           <div style="text-align:center;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://rogveda.vercel.app'}/my-bookings"
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://rogveda-xi.vercel.app'}/my-bookings"
                style="display:inline-block;background:#1d4ed8;color:#fff;font-size:14px;font-weight:700;padding:14px 32px;border-radius:14px;text-decoration:none;">
-              View Booking Status →
+              View Booking Status &rarr;
             </a>
           </div>
 
@@ -251,7 +243,7 @@ export async function sendVisaLetterNotification(opts: {
 
         <tr><td style="background:#f9fafb;border-top:1px solid #f3f4f6;padding:20px 32px;text-align:center;">
           <p style="margin:0;font-size:12px;color:#9ca3af;">
-            © 2025 Rogveda · Medical Travel Booking<br/>
+            &copy; 2025 Rogveda &middot; Medical Travel Booking<br/>
             Questions? Reply to this email and we'll get back to you.
           </p>
         </td></tr>
@@ -262,10 +254,10 @@ export async function sendVisaLetterNotification(opts: {
 </body>
 </html>`
 
-  return getTransporter().sendMail({
+  return resend.emails.send({
     from: FROM,
     to,
-    subject: `✉️ Your Visa Invitation Letter is Ready — Rogveda`,
+    subject: `Your Visa Invitation Letter is Ready - Rogveda | Ref: ${bookingRef}`,
     html,
   })
 }
