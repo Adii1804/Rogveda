@@ -1,9 +1,22 @@
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Explicit Gmail SMTP — more reliable than service:'gmail' on serverless
+function getTransporter() {
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // SSL
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  })
+}
 
-// Using Resend's shared sender — works on free tier to any email
-const FROM = 'Rogveda Medical Travel <onboarding@resend.dev>'
+const FROM = `"Rogveda Medical Travel" <${process.env.GMAIL_USER}>`
 
 /* ─────────────────────────────────────────────
    Email 1: Booking Confirmation (sent to patient)
@@ -32,15 +45,13 @@ export async function sendBookingConfirmation(opts: {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F6FB;padding:32px 16px;">
     <tr><td align="center">
       <table width="100%" style="max-width:560px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-
-        <!-- Header -->
         <tr>
           <td style="background:linear-gradient(135deg,#1d4ed8,#0284c7);padding:32px;">
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
                 <td>
                   <div style="display:inline-block;background:rgba(255,255,255,0.15);border-radius:12px;padding:8px 16px;">
-                    <span style="color:#fff;font-size:22px;font-weight:900;letter-spacing:-0.5px;">Rogveda</span>
+                    <span style="color:#fff;font-size:22px;font-weight:900;">Rogveda</span>
                   </div>
                   <p style="color:rgba(255,255,255,0.75);font-size:13px;margin:8px 0 0;">Medical Travel Booking</p>
                 </td>
@@ -53,25 +64,16 @@ export async function sendBookingConfirmation(opts: {
             </table>
           </td>
         </tr>
-
-        <!-- Body -->
         <tr><td style="padding:32px;">
-
-          <h1 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#111827;">
-            Booking Confirmed, ${patientName}! &#127881;
-          </h1>
+          <h1 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#111827;">Booking Confirmed, ${patientName}!</h1>
           <p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.7;">
             Your Total Knee Replacement has been booked. Our coordinator will contact you within <strong>24 hours</strong>.
           </p>
-
-          <!-- Booking ref -->
           <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:16px;padding:18px;text-align:center;margin-bottom:24px;">
             <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;letter-spacing:1px;">Booking Reference</p>
             <p style="margin:0;font-size:28px;font-weight:900;color:#1d4ed8;font-family:monospace;letter-spacing:3px;">${bookingRef}</p>
             <p style="margin:6px 0 0;font-size:11px;color:#93c5fd;">Save this for your records</p>
           </div>
-
-          <!-- Details table -->
           <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:16px;overflow:hidden;margin-bottom:24px;">
             <tr><td style="padding:14px 20px;border-bottom:1px solid #f3f4f6;">
               <p style="margin:0;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;">Booking Details</p>
@@ -90,16 +92,10 @@ export async function sendBookingConfirmation(opts: {
               </tr></table>
             </td></tr>`).join('')}
           </table>
-
-          <!-- BNPL -->
           <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:16px;padding:16px;margin-bottom:24px;">
-            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#92400e;">&#128179; Book Now, Pay Later</p>
-            <p style="margin:0;font-size:13px;color:#78350f;line-height:1.6;">
-              No payment is due now. Our finance team will reach out to arrange a flexible payment plan.
-            </p>
+            <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#92400e;">Book Now, Pay Later</p>
+            <p style="margin:0;font-size:13px;color:#78350f;line-height:1.6;">No payment is due now. Our finance team will reach out to arrange a flexible payment plan.</p>
           </div>
-
-          <!-- Next steps -->
           <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:16px;padding:20px;margin-bottom:28px;">
             <p style="margin:0 0 14px;font-size:14px;font-weight:800;color:#14532d;">What happens next?</p>
             ${[
@@ -119,31 +115,27 @@ export async function sendBookingConfirmation(opts: {
               </tr>
             </table>`).join('')}
           </div>
-
           <div style="text-align:center;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://rogveda-xi.vercel.app'}/my-bookings"
                style="display:inline-block;background:#1d4ed8;color:#fff;font-size:14px;font-weight:700;padding:14px 32px;border-radius:14px;text-decoration:none;">
-              Track Your Booking &rarr;
+              Track Your Booking
             </a>
           </div>
-
         </td></tr>
-
-        <!-- Footer -->
         <tr><td style="background:#f9fafb;border-top:1px solid #f3f4f6;padding:20px 32px;text-align:center;">
           <p style="margin:0;font-size:12px;color:#9ca3af;">
             &copy; 2025 Rogveda &middot; Medical Travel Booking<br/>
             Trusted by patients from 40+ countries worldwide
           </p>
         </td></tr>
-
       </table>
     </td></tr>
   </table>
 </body>
 </html>`
 
-  return resend.emails.send({
+  const transporter = getTransporter()
+  return transporter.sendMail({
     from: FROM,
     to,
     subject: `Booking Confirmed - ${hospitalName} | Ref: ${bookingRef}`,
@@ -174,26 +166,20 @@ export async function sendVisaLetterNotification(opts: {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F6FB;padding:32px 16px;">
     <tr><td align="center">
       <table width="100%" style="max-width:560px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-
-        <!-- Header -->
         <tr>
           <td style="background:linear-gradient(135deg,#059669,#0d9488);padding:32px;">
             <div style="display:inline-block;background:rgba(255,255,255,0.15);border-radius:12px;padding:8px 16px;margin-bottom:16px;">
               <span style="color:#fff;font-size:22px;font-weight:900;">Rogveda</span>
             </div>
-            <h1 style="margin:0;color:#fff;font-size:24px;font-weight:900;">&#9993; Your Visa Letter is Ready!</h1>
-            <p style="margin:8px 0 0;color:rgba(255,255,255,0.8);font-size:14px;">Great news &mdash; your journey to India just got one step closer</p>
+            <h1 style="margin:0;color:#fff;font-size:24px;font-weight:900;">Your Visa Letter is Ready!</h1>
+            <p style="margin:8px 0 0;color:rgba(255,255,255,0.8);font-size:14px;">Your journey to India just got one step closer</p>
           </td>
         </tr>
-
         <tr><td style="padding:32px;">
-
           <p style="margin:0 0 20px;color:#374151;font-size:15px;line-height:1.7;">
             Hi <strong>${patientName}</strong>,<br/><br/>
-            Your <strong>Visa Invitation Letter</strong> for your procedure at <strong>${hospitalName}</strong> with <strong>${doctorName}</strong> has been officially dispatched to this email address.
+            Your <strong>Visa Invitation Letter</strong> for your procedure at <strong>${hospitalName}</strong> with <strong>${doctorName}</strong> has been dispatched to this email.
           </p>
-
-          <!-- Status -->
           <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:16px;padding:20px;margin-bottom:24px;">
             <table cellpadding="0" cellspacing="0" width="100%"><tr>
               <td style="width:48px;">
@@ -205,8 +191,6 @@ export async function sendVisaLetterNotification(opts: {
               </td>
             </tr></table>
           </div>
-
-          <!-- Details -->
           <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:16px;overflow:hidden;margin-bottom:24px;">
             ${[
               ['Booking Ref', bookingRef],
@@ -217,12 +201,10 @@ export async function sendVisaLetterNotification(opts: {
             <tr><td style="padding:11px 20px;border-bottom:1px solid #f3f4f6;">
               <table width="100%"><tr>
                 <td style="font-size:13px;color:#6b7280;">${label}</td>
-                <td align="right" style="font-size:13px;font-weight:700;color:#111827;font-family:${label === 'Booking Ref' ? 'monospace' : 'inherit'};">${value}</td>
+                <td align="right" style="font-size:13px;font-weight:700;color:#111827;">${value}</td>
               </tr></table>
             </td></tr>`).join('')}
           </table>
-
-          <!-- Next steps -->
           <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:16px;padding:20px;margin-bottom:28px;">
             <p style="margin:0 0 12px;font-size:14px;font-weight:800;color:#1e3a8a;">Your next steps</p>
             <ul style="margin:0;padding-left:20px;color:#1d4ed8;font-size:13px;line-height:2.2;">
@@ -231,30 +213,26 @@ export async function sendVisaLetterNotification(opts: {
               <li>Airport pickup arranged once travel date is confirmed</li>
             </ul>
           </div>
-
           <div style="text-align:center;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://rogveda-xi.vercel.app'}/my-bookings"
                style="display:inline-block;background:#1d4ed8;color:#fff;font-size:14px;font-weight:700;padding:14px 32px;border-radius:14px;text-decoration:none;">
-              View Booking Status &rarr;
+              View Booking Status
             </a>
           </div>
-
         </td></tr>
-
         <tr><td style="background:#f9fafb;border-top:1px solid #f3f4f6;padding:20px 32px;text-align:center;">
           <p style="margin:0;font-size:12px;color:#9ca3af;">
-            &copy; 2025 Rogveda &middot; Medical Travel Booking<br/>
-            Questions? Reply to this email and we'll get back to you.
+            &copy; 2025 Rogveda &middot; Medical Travel Booking
           </p>
         </td></tr>
-
       </table>
     </td></tr>
   </table>
 </body>
 </html>`
 
-  return resend.emails.send({
+  const transporter = getTransporter()
+  return transporter.sendMail({
     from: FROM,
     to,
     subject: `Your Visa Invitation Letter is Ready - Rogveda | Ref: ${bookingRef}`,
