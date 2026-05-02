@@ -127,16 +127,7 @@ export default function MyBookingsPage() {
     setLoading(true)
     setSearched(false)
     try {
-      const patRes = await fetch(`/api/patients?email=${encodeURIComponent(email.trim())}`)
-      if (!patRes.ok) {
-        toast.error('No account found with that email.')
-        setBookings([])
-        setSearched(true)
-        return
-      }
-      const patient = await patRes.json()
-
-      const bkRes = await fetch(`/api/bookings?patient_id=${patient.id}`)
+      const bkRes = await fetch(`/api/bookings?email=${encodeURIComponent(email.trim())}`)
       const data = await bkRes.json()
       setBookings(Array.isArray(data) ? data : [])
       setSearched(true)

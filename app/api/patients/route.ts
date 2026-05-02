@@ -17,21 +17,6 @@ export async function POST(req: NextRequest) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('Invalid email address')
   if (name.length < 2) return err('Name must be at least 2 characters')
 
-  // Upsert: find existing patient or create new
-  const { data: existing } = await supabaseAdmin
-    .from('patients')
-    .select('*')
-    .eq('email', email)
-    .single()
-
-  if (existing) {
-    // Update country/phone if provided
-    if (country || phone) {
-      await supabaseAdmin.from('patients').update({ country, phone }).eq('id', existing.id)
-    }
-    return ok(existing)
-  }
-
   const { data, error } = await supabaseAdmin
     .from('patients')
     .insert({ name, email, country, phone, wallet_balance: 0 })

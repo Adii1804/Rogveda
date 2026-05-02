@@ -108,10 +108,27 @@ export async function POST(req: NextRequest) {
   return ok({ booking, new_wallet_balance: newBalance }, 201)
 }
 
-// Fetch bookings by patient email (for booking status page)
+// Fetch bookings by email (all patients sharing that email) or by patient_id
 export async function GET(req: NextRequest) {
   const patientId = req.nextUrl.searchParams.get('patient_id')
-  if (!patientId) return err('patient_id is required')
+  const email     = req.nextUrl.searchParams.get('email')?.toLowerCase()
+
+  if (!patientId && !email) return err('email or patient_id is required')
+
+  let patientIds: string[] = []
+
+  if (patientId) {
+    patientIds = [patientId]
+  } else {
+    const { data: patients, error: patErr } = await supabaseAdmin
+      .from('patients')
+      .select('id')
+      .eq('email', email!)
+
+    if (patErr) return err(patErr.message, 500)
+    if (!patients || patients.length === 0) return ok([])
+    patientIds = patients.map((p: { id: string }) => p.id)
+  }
 
   const { data, error } = await supabaseAdmin
     .from('bookings')
@@ -121,7 +138,7 @@ export async function GET(req: NextRequest) {
       doctors   (name, experience_years),
       vendor_tasks (id, task_name, completed, completed_at)
     `)
-    .eq('patient_id', patientId)
+    .in('patient_id', patientIds)
     .order('created_at', { ascending: false })
 
   if (error) return err(error.message, 500)

@@ -35,7 +35,7 @@ create table if not exists pricing (
 create table if not exists patients (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  email text unique not null,
+  email text not null,
   wallet_balance numeric(10,2) default 0,
   created_at timestamptz default now()
 );
