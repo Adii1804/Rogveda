@@ -190,8 +190,8 @@ export default function SearchPage() {
       {/* Navbar */}
       <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="overflow-hidden" style={{ height: 28 }}>
-            <Image src="/logo.png" alt="Rogveda" height={44} width={176} className="object-contain mix-blend-multiply -mt-1" />
+          <div className="flex items-center">
+            <Image src="/logo.png" alt="Rogveda" height={40} width={120} className="object-contain mix-blend-multiply" />
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">

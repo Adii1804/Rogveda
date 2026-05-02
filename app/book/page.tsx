@@ -220,8 +220,8 @@ function BookingForm() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className="overflow-hidden" style={{ height: 28 }}>
-            <Image src="/logo.png" alt="Rogveda" height={44} width={176} className="object-contain mix-blend-multiply -mt-1" />
+          <div className="flex items-center">
+            <Image src="/logo.png" alt="Rogveda" height={40} width={120} className="object-contain mix-blend-multiply" />
           </div>
         </div>
       </header>
