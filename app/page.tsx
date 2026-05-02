@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Hospital, Currency, CONVERSION, CURRENCY_SYMBOL } from '@/lib/types'
+import { Hospital, Currency, CONVERSION, CURRENCY_SYMBOL, CURRENCIES } from '@/lib/types'
 
 function formatPrice(usd: number, currency: Currency) {
   const amount = Math.round(usd * CONVERSION[currency])
@@ -201,22 +201,16 @@ export default function SearchPage() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Currency toggle */}
-            <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-0.5">
-              {(['USD', 'INR', 'NGN'] as Currency[]).map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCurrency(c)}
-                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    currency === c
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {c}
-                </button>
+            {/* Currency selector */}
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as Currency)}
+              className="bg-gray-100 rounded-xl px-3 py-2 text-xs font-bold text-gray-700 border-none outline-none cursor-pointer"
+            >
+              {CURRENCIES.map(({ code, label }) => (
+                <option key={code} value={code}>{label}</option>
               ))}
-            </div>
+            </select>
             <a
               href="/my-bookings"
               className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 border border-gray-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition"

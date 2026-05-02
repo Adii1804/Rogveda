@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
-import { Booking, Currency, CONVERSION, CURRENCY_SYMBOL } from '@/lib/types'
+import { Booking, Currency, CONVERSION, CURRENCY_SYMBOL, CURRENCIES } from '@/lib/types'
 
 function formatAmount(usd: number, currency: Currency) {
   const amount = Math.round(usd * CONVERSION[currency])
@@ -195,22 +195,16 @@ export default function VendorPage() {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Currency toggle */}
-            <div className="flex items-center bg-gray-100 rounded-xl p-0.5 gap-0.5">
-              {(['USD', 'INR', 'NGN'] as Currency[]).map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCurrency(c)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    currency === c
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  {c}
-                </button>
+            {/* Currency selector */}
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as Currency)}
+              className="bg-gray-100 rounded-xl px-3 py-2 text-xs font-bold text-gray-700 border-none outline-none cursor-pointer"
+            >
+              {CURRENCIES.map(({ code, label }) => (
+                <option key={code} value={code}>{label}</option>
               ))}
-            </div>
+            </select>
 
             <button
               onClick={() => fetchBookings()}
