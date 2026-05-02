@@ -190,14 +190,8 @@ export default function SearchPage() {
       {/* Navbar */}
       <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-sm shadow-blue-200">
-              <span className="text-white font-black text-base">R</span>
-            </div>
-            <div>
-              <span className="text-xl font-black text-gray-900 tracking-tight">Rogveda</span>
-              <span className="hidden sm:inline text-xs text-gray-400 ml-2 font-medium">Medical Travel</span>
-            </div>
+          <div className="flex items-center">
+            <Image src="/logo.png" alt="Rogveda" height={44} width={180} className="object-contain" />
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -347,9 +341,8 @@ export default function SearchPage() {
       <footer className="bg-gray-900 text-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-black">R</div>
-              <span className="font-black text-lg">Rogveda</span>
+            <div className="flex items-center">
+              <Image src="/logo.png" alt="Rogveda" height={40} width={160} className="object-contain brightness-0 invert" />
             </div>
             <p className="text-gray-400 text-sm">Trusted by patients from 40+ countries worldwide</p>
           </div>

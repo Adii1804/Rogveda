@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import toast from 'react-hot-toast'
 import { Booking, Currency, CONVERSION, CURRENCY_SYMBOL, CURRENCIES } from '@/lib/types'
 
@@ -187,12 +188,8 @@ export default function VendorPage() {
       {/* Header */}
       <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white font-black shadow-sm shadow-blue-200">R</div>
-            <div>
-              <span className="font-black text-gray-900">Rogveda</span>
-              <span className="text-xs text-gray-400 ml-2 hidden sm:inline">Vendor Dashboard</span>
-            </div>
+          <div className="flex items-center">
+            <Image src="/logo.png" alt="Rogveda" height={44} width={180} className="object-contain" />
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Currency selector */}

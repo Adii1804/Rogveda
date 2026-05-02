@@ -220,9 +220,8 @@ function BookingForm() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black text-xs">R</div>
-            <span className="font-black text-gray-900">Rogveda</span>
+          <div className="flex items-center">
+            <Image src="/logo.png" alt="Rogveda" height={40} width={160} className="object-contain" />
           </div>
         </div>
       </header>
