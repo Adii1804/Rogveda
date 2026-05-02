@@ -342,7 +342,7 @@ export default function SearchPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center">
-              <Image src="/logo.png" alt="Rogveda" height={36} width={144} className="object-contain mix-blend-screen" />
+              <Image src="/logo.png" alt="Rogveda" height={36} width={144} className="object-contain mix-blend-multiply" />
             </div>
             <p className="text-gray-400 text-sm">Trusted by patients from 40+ countries worldwide</p>
           </div>
