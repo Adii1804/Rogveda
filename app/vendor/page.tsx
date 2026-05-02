@@ -84,7 +84,7 @@ export default function VendorPage() {
         setLoggedIn(true)
         toast.success('Welcome back, Apollo Spectra!')
       } else {
-        setLoginError('Invalid credentials. Try apollo / apollo123')
+        setLoginError('Invalid credentials. Please check your username and password.')
       }
       setLoginLoading(false)
     }, 600)
