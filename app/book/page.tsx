@@ -58,7 +58,7 @@ function BookingForm() {
   const [email,            setEmail]            = useState('')
   const [phoneNumber,      setPhoneNumber]      = useState('')
   const [loading,          setLoading]          = useState(false)
-  const [confirmed,        setConfirmed]        = useState<{ bookingId: string; newBalance: number } | null>(null)
+  const [confirmed,        setConfirmed]        = useState<{ bookingNumber: number; newBalance: number } | null>(null)
   const [error,            setError]            = useState('')
 
   // Fetch countries from Supabase via API
@@ -109,7 +109,7 @@ function BookingForm() {
       const bookingData = await bookingRes.json()
       if (!bookingRes.ok) throw new Error(bookingData.error || 'Booking failed')
 
-      setConfirmed({ bookingId: bookingData.booking.id, newBalance: bookingData.new_wallet_balance })
+      setConfirmed({ bookingNumber: bookingData.booking.booking_number, newBalance: bookingData.new_wallet_balance })
       toast.success('Booking confirmed! Our team will contact you shortly.')
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Something went wrong'
@@ -139,7 +139,7 @@ function BookingForm() {
             <div className="p-6">
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center mb-5">
                 <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1">Booking Reference</p>
-                <p className="text-2xl font-black font-mono text-blue-700 tracking-wider">{confirmed.bookingId.slice(0, 8).toUpperCase()}</p>
+                <p className="text-2xl font-black font-mono text-blue-700 tracking-wider">#{confirmed.bookingNumber}</p>
                 <p className="text-xs text-blue-400 mt-1">Save this for your records</p>
               </div>
 

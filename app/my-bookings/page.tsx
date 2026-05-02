@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 
 interface BookingRecord {
   id: string
+  booking_number: number
   room_type: string
   price_usd: number
   currency: string
@@ -53,7 +54,7 @@ function BookingCard({ booking }: { booking: BookingRecord }) {
             Booking Ref
           </span>
           <span className="font-mono text-xs font-bold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-lg">
-            {booking.id.slice(0, 8).toUpperCase()}
+            #{booking.booking_number}
           </span>
         </div>
 

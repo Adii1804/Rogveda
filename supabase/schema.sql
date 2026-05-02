@@ -43,6 +43,7 @@ create table if not exists patients (
 -- 5. BOOKINGS
 create table if not exists bookings (
   id uuid primary key default gen_random_uuid(),
+  booking_number bigint generated always as identity,
   patient_id uuid references patients(id),
   hospital_id uuid references hospitals(id),
   doctor_id uuid references doctors(id),

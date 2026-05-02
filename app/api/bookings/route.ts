@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
     sendBookingConfirmation({
       to:           emailPatient.email,
       patientName:  emailPatient.name,
-      bookingRef:   booking.id.slice(0, 8).toUpperCase(),
+      bookingRef:   `#${booking.booking_number}`,
       hospitalName: emailHospital?.name ?? '',
       hospitalCity: emailHospital?.city ?? '',
       doctorName:   emailDoctor?.name ?? '',

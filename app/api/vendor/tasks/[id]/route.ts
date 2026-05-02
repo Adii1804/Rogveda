@@ -43,6 +43,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .from('bookings')
     .select(`
       id,
+      booking_number,
       patients  (name, email),
       hospitals (name),
       doctors   (name)
@@ -59,7 +60,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     sendVisaLetterNotification({
       to:           patient.email,
       patientName:  patient.name,
-      bookingRef:   task.booking_id.slice(0, 8).toUpperCase(),
+      bookingRef:   `#${fullBooking?.booking_number}`,
       hospitalName: hospital?.name ?? '',
       doctorName:   doctor?.name  ?? '',
     }).catch((e) => console.error('Visa email failed:', e))
