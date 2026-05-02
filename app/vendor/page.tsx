@@ -282,7 +282,7 @@ export default function VendorPage() {
             {/* Desktop header */}
             <div className="hidden md:grid grid-cols-12 gap-3 px-6 py-3.5 bg-gray-50/80 border-b border-gray-100">
               {['Patient', 'Hospital', 'Doctor · Room', 'Amount', 'Status', 'Time'].map((h) => (
-                <div key={h} className={`text-[10px] font-black text-gray-400 uppercase tracking-wider ${h === 'Patient' ? 'col-span-3' : h === 'Doctor · Room' ? 'col-span-2' : 'col-span-2'}`}>
+                <div key={h} className={`text-[10px] font-black text-gray-400 uppercase tracking-wider ${h === 'Patient' ? 'col-span-3' : h === 'Time' ? 'col-span-1' : 'col-span-2'}`}>
                   {h}
                 </div>
               ))}
