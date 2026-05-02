@@ -154,8 +154,8 @@ export default function MyBookingsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className="flex items-center">
-            <Image src="/logo.png" alt="Rogveda" height={32} width={128} className="object-contain mix-blend-multiply" />
+          <div className="overflow-hidden" style={{ height: 28 }}>
+            <Image src="/logo.png" alt="Rogveda" height={44} width={176} className="object-contain mix-blend-multiply -mt-1" />
           </div>
         </div>
       </header>
