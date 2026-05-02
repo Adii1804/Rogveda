@@ -128,7 +128,7 @@ export default function VendorPage() {
       <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
           <div className="text-center mb-8">
-            <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto mb-4 shadow-lg shadow-blue-200">R</div>
+            <Image src="/logo.png" alt="Rogveda" height={56} width={224} className="object-contain mix-blend-multiply mx-auto mb-4" />
             <h1 className="text-2xl font-black text-gray-900">Vendor Portal</h1>
             <p className="text-gray-400 text-sm mt-1">Apollo Spectra · Delhi</p>
           </div>
@@ -189,7 +189,7 @@ export default function VendorPage() {
       <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center">
-            <Image src="/logo.png" alt="Rogveda" height={44} width={180} className="object-contain" />
+            <Image src="/logo.png" alt="Rogveda" height={36} width={144} className="object-contain mix-blend-multiply" />
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Currency selector */}

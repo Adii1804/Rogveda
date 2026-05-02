@@ -221,7 +221,7 @@ function BookingForm() {
             </svg>
           </button>
           <div className="flex items-center">
-            <Image src="/logo.png" alt="Rogveda" height={40} width={160} className="object-contain" />
+            <Image src="/logo.png" alt="Rogveda" height={36} width={144} className="object-contain mix-blend-multiply" />
           </div>
         </div>
       </header>

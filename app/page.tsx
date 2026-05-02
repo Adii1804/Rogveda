@@ -191,7 +191,7 @@ export default function SearchPage() {
       <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center">
-            <Image src="/logo.png" alt="Rogveda" height={44} width={180} className="object-contain" />
+            <Image src="/logo.png" alt="Rogveda" height={36} width={144} className="object-contain mix-blend-multiply" />
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -342,7 +342,7 @@ export default function SearchPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center">
-              <Image src="/logo.png" alt="Rogveda" height={40} width={160} className="object-contain brightness-0 invert" />
+              <Image src="/logo.png" alt="Rogveda" height={36} width={144} className="object-contain mix-blend-screen" />
             </div>
             <p className="text-gray-400 text-sm">Trusted by patients from 40+ countries worldwide</p>
           </div>
